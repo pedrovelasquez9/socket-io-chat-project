@@ -36,7 +36,7 @@ server.listen(3000, () => {
 });
 
 // TODO:
-// Broadcast a message to connected users when someone connects or disconnects.
+// Broadcast a message to connected users when someone connects or disconnects. (partially done)
 // Add support for nicknames. (partially done)
 // Don’t send the same message to the user that sent it. Instead, append the message directly as soon as he/she presses enter.
 // Show who’s online.
