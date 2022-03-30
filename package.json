@@ -1,0 +1,16 @@
+{
+  "name": "socket-io-chat",
+  "version": "1.0.0",
+  "description": "socket.io chat app en directo para Programación en Español",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Programación en español",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.3",
+    "socket.io": "^4.4.1"
+  }
+}

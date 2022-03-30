@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        margin: 0;
+        padding-bottom: 3rem;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+      }
+
+      #form {
+        background: rgba(0, 0, 0, 0.15);
+        padding: 0.25rem;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        height: 3rem;
+        box-sizing: border-box;
+        backdrop-filter: blur(10px);
+      }
+      #input {
+        border: none;
+        padding: 0 1rem;
+        flex-grow: 1;
+        border-radius: 2rem;
+        margin: 0.25rem;
+      }
+      #input:focus {
+        outline: none;
+      }
+      #form > button {
+        background: #333;
+        border: none;
+        padding: 0 1rem;
+        margin: 0.25rem;
+        border-radius: 3px;
+        outline: none;
+        color: #fff;
+      }
+
+      #messages {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+      }
+      #messages > li {
+        padding: 0.5rem 1rem;
+      }
+      #messages > li:nth-child(odd) {
+        background: #efefef;
+      }
+    </style>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+    <form id="form" action="">
+      <span id="loading-message"></span>
+      <input id="input" type="text" /><button>Enviar</button>
+    </form>
+    <!-- Importamos socket.io (en desarrollo no necesitamos un bundle para cliente y para server, el del server hace el trabajo de ambos) -->
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- Instanciamos el cliente y lo almacenamos en socket -->
+    <script>
+      //Simular nickname
+      const nickname = "Pedro";
+      //   io recibe del host del server, sin embargo no la pasamos aquí porque por defecto se conecta al mismo host que esté sirviendo la web
+      const socketClient = io();
+      //Obtenemos el mensaje a enviar del form en el submit
+      const form = document.getElementById("form");
+      const input = document.getElementById("input");
+      const messagesContainer = document.getElementById("messages");
+      const loadingMessage = document.getElementById("loading-message");
+
+      //Centralizamos la función para crear mensajes en el chat
+      const addNewMessageToChat = (msg) => {
+        const messageItem = document.createElement("li");
+        messageItem.textContent = msg;
+        messagesContainer.appendChild(messageItem);
+        window.scrollTo(0, document.body.scrollHeight);
+      };
+
+      //Añadimos un eventListener para enviar mensajes al server y renderizarlos en el chat
+      form.addEventListener("submit", (evt) => {
+        evt.preventDefault();
+        console.log(socketClient);
+        console.log(loadingMessage.textContent);
+        //Si el input tiene algún mensaje, emitimos un evento con socket con el contenido del mensaje como data
+        if (input.value) {
+          socketClient.emit("chat msg", `${nickname}: ${input.value}`);
+          input.value = "";
+          loadingMessage.textContent = "";
+        }
+        console.log(loadingMessage.textContent);
+      });
+
+      //   Escuchamos al cambio del valor del input para el mensaje de "el usuario está escribiendo"
+      input.addEventListener("keyup", () => {
+        !input.value || input.value.length === 0
+          ? (loadingMessage.textContent = "")
+          : socketClient.emit("user typing", nickname);
+      });
+
+      socketClient.on("user typing server", (loadingMsg) => {
+        loadingMessage.textContent = loadingMsg;
+      });
+      //   Enviamos mensaje al chat cuando un usuario se conecta o se desconecta
+      socketClient.on("new user connected", (loadingMsg) => {
+        const connectedMsg = "Un usuario se ha conectado";
+        addNewMessageToChat(connectedMsg);
+      });
+
+      socketClient.on("user disconnected", (loadingMsg) => {
+        const disconnectedMsg = "Un usuario se ha desconectado";
+        addNewMessageToChat(disconnectedMsg);
+      });
+
+      //   Agregamos nuevo mensaje al chat cuando un usuario envía un mensaje
+      socketClient.on("chat msg server", (chatMessage) => {
+        addNewMessageToChat(chatMessage);
+      });
+    </script>
+  </body>
+</html>
