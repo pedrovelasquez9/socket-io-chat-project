@@ -8,6 +8,8 @@ const { Server } = require("socket.io");
 const ioServer = new Server(server);
 let usersConnected = [];
 
+app.use(express.static("public"));
+
 app.get("/", (req, res) => {
   res.sendFile(`${__dirname}/index.html`);
 });
@@ -57,4 +59,3 @@ server.listen(3000, () => {
 // TODO:
 // Add support for nicknames. (partially done) test native html modals with this
 // Add private messaging replacing the main chat window and try to go back maintaining the main chat messages
-//Separate css and js from client's html file
