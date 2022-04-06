@@ -49,6 +49,7 @@
         list-style-type: none;
         margin: 0;
         padding: 0;
+        width: 88%;
       }
       #messages > li {
         padding: 0.5rem 1rem;
@@ -56,10 +57,23 @@
       #messages > li:nth-child(odd) {
         background: #efefef;
       }
+      .chat-main-container {
+        display: flex;
+        flex-direction: row;
+      }
+      #connectedUsers {
+        height: 95vh;
+        background: #ddd;
+        width: 12%;
+        margin: 0;
+      }
     </style>
   </head>
   <body>
-    <ul id="messages"></ul>
+    <div class="chat-main-container">
+      <ul id="messages"></ul>
+      <ul id="connectedUsers"></ul>
+    </div>
     <form id="form" action="">
       <span id="loading-message"></span>
       <input id="input" type="text" /><button>Enviar</button>
@@ -77,6 +91,7 @@
       const input = document.getElementById("input");
       const messagesContainer = document.getElementById("messages");
       const loadingMessage = document.getElementById("loading-message");
+      const usersListContainer = document.getElementById("connectedUsers");
 
       //Centralizamos la función para crear mensajes en el chat
       const addNewMessageToChat = (msg) => {
@@ -84,6 +99,16 @@
         messageItem.textContent = msg;
         messagesContainer.appendChild(messageItem);
         window.scrollTo(0, document.body.scrollHeight);
+      };
+
+      //Actualizamos la lista de usuarios conectados
+      const updateUsersConnected = (usersList) => {
+        usersListContainer.innerHTML = "";
+        usersList.forEach((user) => {
+          const userItem = document.createElement("li");
+          userItem.innerText = user;
+          usersListContainer.appendChild(userItem);
+        });
       };
 
       //Añadimos un eventListener para enviar mensajes al server y renderizarlos en el chat
@@ -94,6 +119,7 @@
         //Si el input tiene algún mensaje, emitimos un evento con socket con el contenido del mensaje como data
         if (input.value) {
           socketClient.emit("chat msg", `${nickname}: ${input.value}`);
+          addNewMessageToChat(`${nickname}: ${input.value}`);
           input.value = "";
           loadingMessage.textContent = "";
         }
@@ -111,19 +137,25 @@
         loadingMessage.textContent = loadingMsg;
       });
       //   Enviamos mensaje al chat cuando un usuario se conecta o se desconecta
-      socketClient.on("new user connected", (loadingMsg) => {
-        const connectedMsg = "Un usuario se ha conectado";
-        addNewMessageToChat(connectedMsg);
+      socketClient.on("new user connected", (data) => {
+        const { msg, userNames } = data;
+        addNewMessageToChat(msg);
+        updateUsersConnected(userNames);
       });
 
-      socketClient.on("user disconnected", (loadingMsg) => {
-        const disconnectedMsg = "Un usuario se ha desconectado";
-        addNewMessageToChat(disconnectedMsg);
+      socketClient.on("user disconnected", (data) => {
+        const { msg, updatedUsers } = data;
+        addNewMessageToChat(msg);
+        updateUsersConnected(updatedUsers);
       });
 
       //   Agregamos nuevo mensaje al chat cuando un usuario envía un mensaje
       socketClient.on("chat msg server", (chatMessage) => {
         addNewMessageToChat(chatMessage);
+      });
+
+      socketClient.on("connect", () => {
+        socketClient.emit("new user nickname", { nickname });
       });
     </script>
   </body>

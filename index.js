@@ -6,18 +6,27 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 //Creamos un server desde socket.io (recibe como parámetro la instancia del server http de node)
 const ioServer = new Server(server);
+let usersConnected = [];
 
 app.get("/", (req, res) => {
   res.sendFile(`${__dirname}/index.html`);
 });
 
 //Nos registramos al evento de conexión de algún usuario al socket
-ioServer.on("connection", (socket) => {
-  ioServer.emit("new user connected");
+ioServer.on("connection", async (socket) => {
+  socket.on("new user nickname", (data) => {
+    usersConnected.push({ id: socket.id, nickname: data.nickname });
+    const userNames = usersConnected.map((user) => user.nickname);
+    socket.broadcast.emit("new user connected", {
+      msg: `${data.nickname} ha entrado a la sala`,
+      userNames,
+    });
+  });
+
   //Escuchamos al evento de chat msg del cliente
   socket.on("chat msg", (message) => {
-    //emitimos el mensaje al cliente para mostrarlo en el panel del chat
-    ioServer.emit("chat msg server", message);
+    //emitimos el mensaje al cliente para mostrarlo en el panel del chat, al hacerlo con broadcast, el mensaje lo reciben los otros clientes y no el que lo envía
+    socket.broadcast.emit("chat msg server", message);
     console.log("mensaje del chat", message);
   });
   //Escuchamos al evento de user typing del cliente
@@ -26,8 +35,18 @@ ioServer.on("connection", (socket) => {
   });
   //el evento de desconexión viene dado por el argumento recibido en el callback (objeto socket)
   socket.on("disconnect", () => {
-    ioServer.emit("user disconnected");
-    console.log("User disconnected");
+    const disconnectedNickname = usersConnected.filter(
+      (user) => user.id === socket.id
+    );
+
+    usersConnected = usersConnected.filter((user) => user.id !== socket.id);
+
+    const updatedUsers = usersConnected.map((user) => user.nickname);
+
+    ioServer.emit("user disconnected", {
+      msg: `${disconnectedNickname[0].nickname} ha dejado la sala`,
+      updatedUsers,
+    });
   });
 });
 
@@ -36,8 +55,6 @@ server.listen(3000, () => {
 });
 
 // TODO:
-// Broadcast a message to connected users when someone connects or disconnects. (partially done)
-// Add support for nicknames. (partially done)
-// Don’t send the same message to the user that sent it. Instead, append the message directly as soon as he/she presses enter.
-// Show who’s online.
-// Add private messaging.
+// Add support for nicknames. (partially done) test native html modals with this
+// Add private messaging replacing the main chat window and try to go back maintaining the main chat messages
+//Separate css and js from client's html file
