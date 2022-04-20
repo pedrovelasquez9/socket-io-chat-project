@@ -17,6 +17,7 @@ app.get("/", (req, res) => {
 //Nos registramos al evento de conexión de algún usuario al socket
 ioServer.on("connection", async (socket) => {
   socket.on("new user nickname", (data) => {
+    console.log("DATA", data);
     usersConnected.push({ id: socket.id, nickname: data.nickname });
     const userNames = usersConnected.map((user) => user.nickname);
     socket.broadcast.emit("new user connected", {
@@ -57,5 +58,6 @@ server.listen(3000, () => {
 });
 
 // TODO:
-// Add support for nicknames. (partially done) test native html modals with this
+// check the online users list duplications when a new user enters the chat space
+// Check the "user is writing" message when other users aren't writing
 // Add private messaging replacing the main chat window and try to go back maintaining the main chat messages

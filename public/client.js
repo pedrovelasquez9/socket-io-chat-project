@@ -1,5 +1,5 @@
 //Simular nickname
-const nickname = "Pedro";
+let nickname = "";
 //   io recibe del host del server, sin embargo no la pasamos aquí porque por defecto se conecta al mismo host que esté sirviendo la web
 //  Instanciamos el cliente y lo almacenamos en socket
 const socketClient = io();
@@ -9,6 +9,28 @@ const input = document.getElementById("input");
 const messagesContainer = document.getElementById("messages");
 const loadingMessage = document.getElementById("loading-message");
 const usersListContainer = document.getElementById("connectedUsers");
+const dialog = document.getElementById("nickname-modal");
+const nicknameInput = document.getElementById("nickname");
+const nicknameForm = document.getElementById("nickname-form");
+
+const openModal = () => {
+  dialog.showModal();
+};
+
+const closeModal = () => {
+  dialog.close();
+};
+
+nicknameForm.addEventListener("submit", (evt) => {
+  evt.preventDefault();
+  defineNickname();
+});
+
+const defineNickname = () => {
+  nickname = nicknameInput.value;
+  socketClient.emit("new user nickname", { nickname });
+  closeModal();
+};
 
 //Centralizamos la función para crear mensajes en el chat
 const addNewMessageToChat = (msg) => {
@@ -22,6 +44,7 @@ const addNewMessageToChat = (msg) => {
 const updateUsersConnected = (usersList) => {
   usersListContainer.innerHTML = "";
   usersList.forEach((user) => {
+    console.log("USER", user);
     const userItem = document.createElement("li");
     userItem.innerText = user;
     usersListContainer.appendChild(userItem);
@@ -71,6 +94,6 @@ socketClient.on("chat msg server", (chatMessage) => {
   addNewMessageToChat(chatMessage);
 });
 
-socketClient.on("connect", () => {
-  socketClient.emit("new user nickname", { nickname });
+window.addEventListener("load", () => {
+  openModal();
 });
