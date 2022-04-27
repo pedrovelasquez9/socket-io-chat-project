@@ -36,7 +36,7 @@ dialog::backdrop {
 #input:focus {
   outline: none;
 }
-#form > button {
+.btn {
   background: #333;
   border: none;
   padding: 0 1rem;
@@ -46,12 +46,14 @@ dialog::backdrop {
   color: #fff;
 }
 
-#messages {
+#messages,
+#dmMessages {
   list-style-type: none;
   margin: 0;
   padding: 0;
   width: 88%;
 }
+
 #messages > li {
   padding: 0.5rem 1rem;
 }
@@ -63,8 +65,30 @@ dialog::backdrop {
   flex-direction: row;
 }
 #connectedUsers {
-  height: 95vh;
+  height: 93.3vh;
   background: #ddd;
   width: 12%;
   margin: 0;
+  list-style: none;
+  font-weight: 500;
+  padding: 10px 10px;
+}
+
+#connectedUsers li {
+  padding: 5px 0;
+  cursor: pointer;
+}
+
+.loading-message-span {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hidden {
+  display: none;
+}
+
+.shown {
+  display: block;
 }

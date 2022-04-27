@@ -16,17 +16,19 @@
           id="nickname"
           placeholder="Define tu nombre de usuario"
         />
-        <button onclick="defineNickname()">Confirmar</button>
+        <input type="submit" value="Confirmar" class="btn" />
       </form>
     </dialog>
     <div class="chat-main-container">
-      <ul id="messages"></ul>
+      <ul id="messages" class="shown"></ul>
+      <ul id="dmMessages" class="hidden"></ul>
       <ul id="connectedUsers"></ul>
     </div>
+
     <form id="form" action="">
-      <span id="loading-message"></span>
-      <input id="input" type="text" /><button>Enviar</button
-      ><button onclick="openModal()">Definir nickname</button>
+      <span class="loading-message-span" id="loading-message"></span>
+      <input id="input" type="text" /><button class="btn">Enviar</button
+      ><button id="btnChatGlobal">Chat global</button>
     </form>
     <!-- Importamos socket.io (en desarrollo no necesitamos un bundle para cliente y para server, el del server hace el trabajo de ambos) -->
     <script src="/socket.io/socket.io.js"></script>

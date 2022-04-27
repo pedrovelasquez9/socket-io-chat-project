@@ -12,6 +12,8 @@ const usersListContainer = document.getElementById("connectedUsers");
 const dialog = document.getElementById("nickname-modal");
 const nicknameInput = document.getElementById("nickname");
 const nicknameForm = document.getElementById("nickname-form");
+const directMessagesContainer = document.getElementById("dmMessages");
+const btnChatGlobal = document.getElementById("btnChatGlobal");
 
 const openModal = () => {
   dialog.showModal();
@@ -26,6 +28,11 @@ nicknameForm.addEventListener("submit", (evt) => {
   defineNickname();
 });
 
+btnChatGlobal.addEventListener("click", () => {
+  directMessagesContainer.setAttribute("class", "hidden");
+  messagesContainer.setAttribute("class", "shown");
+});
+
 const defineNickname = () => {
   nickname = nicknameInput.value;
   socketClient.emit("new user nickname", { nickname });
@@ -38,15 +45,20 @@ const addNewMessageToChat = (msg) => {
   messageItem.textContent = msg;
   messagesContainer.appendChild(messageItem);
   window.scrollTo(0, document.body.scrollHeight);
+  loadingMessage.textContent = "";
 };
 
 //Actualizamos la lista de usuarios conectados
 const updateUsersConnected = (usersList) => {
   usersListContainer.innerHTML = "";
   usersList.forEach((user) => {
-    console.log("USER", user);
     const userItem = document.createElement("li");
     userItem.innerText = user;
+    userItem.setAttribute("id", user);
+    userItem.addEventListener("click", () => {
+      directMessagesContainer.setAttribute("class", "shown");
+      messagesContainer.setAttribute("class", "hidden");
+    });
     usersListContainer.appendChild(userItem);
   });
 };
@@ -63,7 +75,6 @@ form.addEventListener("submit", (evt) => {
     input.value = "";
     loadingMessage.textContent = "";
   }
-  console.log(loadingMessage.textContent);
 });
 
 //   Escuchamos al cambio del valor del input para el mensaje de "el usuario está escribiendo"

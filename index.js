@@ -17,10 +17,9 @@ app.get("/", (req, res) => {
 //Nos registramos al evento de conexión de algún usuario al socket
 ioServer.on("connection", async (socket) => {
   socket.on("new user nickname", (data) => {
-    console.log("DATA", data);
     usersConnected.push({ id: socket.id, nickname: data.nickname });
     const userNames = usersConnected.map((user) => user.nickname);
-    socket.broadcast.emit("new user connected", {
+    socket.emit("new user connected", {
       msg: `${data.nickname} ha entrado a la sala`,
       userNames,
     });
@@ -34,7 +33,7 @@ ioServer.on("connection", async (socket) => {
   });
   //Escuchamos al evento de user typing del cliente
   socket.on("user typing", (nickname) => {
-    ioServer.emit("user typing server", `${nickname} está escribiendo`);
+    socket.broadcast.emit("user typing server", `${nickname} está escribiendo`);
   });
   //el evento de desconexión viene dado por el argumento recibido en el callback (objeto socket)
   socket.on("disconnect", () => {
@@ -44,12 +43,12 @@ ioServer.on("connection", async (socket) => {
 
     usersConnected = usersConnected.filter((user) => user.id !== socket.id);
 
-    const updatedUsers = usersConnected.map((user) => user.nickname);
-
-    ioServer.emit("user disconnected", {
-      msg: `${disconnectedNickname[0].nickname} ha dejado la sala`,
-      updatedUsers,
-    });
+    if (disconnectedNickname.length > 0) {
+      ioServer.emit("user disconnected", {
+        msg: `${disconnectedNickname[0].nickname} ha dejado la sala`,
+        usersConnected,
+      });
+    }
   });
 });
 
@@ -58,6 +57,4 @@ server.listen(3000, () => {
 });
 
 // TODO:
-// check the online users list duplications when a new user enters the chat space
-// Check the "user is writing" message when other users aren't writing
 // Add private messaging replacing the main chat window and try to go back maintaining the main chat messages
