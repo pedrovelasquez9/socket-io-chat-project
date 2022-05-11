@@ -27,8 +27,10 @@
 
     <form id="form" action="">
       <span class="loading-message-span" id="loading-message"></span>
-      <input id="input" type="text" /><button class="btn">Enviar</button
-      ><button id="btnChatGlobal">Chat global</button>
+      <input id="input" type="text" /><button class="btn">Enviar</button>
+      <select id="userSelect" name="userSelect">
+        <option value="global">Chat Global</option>
+      </select>
     </form>
     <!-- Importamos socket.io (en desarrollo no necesitamos un bundle para cliente y para server, el del server hace el trabajo de ambos) -->
     <script src="/socket.io/socket.io.js"></script>

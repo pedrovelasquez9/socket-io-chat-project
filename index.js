@@ -19,10 +19,22 @@ ioServer.on("connection", async (socket) => {
   socket.on("new user nickname", (data) => {
     usersConnected.push({ id: socket.id, nickname: data.nickname });
     const userNames = usersConnected.map((user) => user.nickname);
-    socket.emit("new user connected", {
+    console.log(userNames);
+    ioServer.emit("new user connected", {
       msg: `${data.nickname} ha entrado a la sala`,
       userNames,
     });
+  });
+
+  socket.on("private message", (obj) => {
+    const { userSelected, msg } = obj;
+    const user = usersConnected.filter(
+      (item) => item.nickname === userSelected
+    );
+    const myUser = usersConnected.filter((item) => item.id === socket.id);
+    socket.to(user[0].id).emit("private message", myUser[0], msg);
+    console.log(socket.id);
+    console.log(user);
   });
 
   //Escuchamos al evento de chat msg del cliente
@@ -55,6 +67,3 @@ ioServer.on("connection", async (socket) => {
 server.listen(3000, () => {
   console.log("listening on port: 3000");
 });
-
-// TODO:
-// Add private messaging replacing the main chat window and try to go back maintaining the main chat messages
